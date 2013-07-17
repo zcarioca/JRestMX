@@ -1,0 +1,76 @@
+/*
+ * Project:  JRestMX
+ * 
+ * Copyright (C) 2010 zcarioca.net
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.zcarioca.jmx.services.impl;
+
+import static org.junit.Assert.*;
+
+import java.util.Set;
+
+import javax.management.ObjectInstance;
+
+import net.zcarioca.jmx.services.MBeanObjectService;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+/**
+ * Tests the {@link MBeanObjectServiceImpl}.
+ * 
+ * @author Rafael Chargel
+ */
+@RunWith(value = SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"classpath:META-INF/spring/TEST-jrestmx-context.xml"})
+public class MBeanObjectServiceImplTest {
+    
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+    
+    @Autowired
+    private MBeanObjectService service;
+
+    @Test
+    public void testFetchAllObjectInstances() {
+        Set<ObjectInstance> mbeans = this.service.fetchAllObjectInstances();
+        
+        assertNotNull(mbeans);
+        assertTrue(mbeans.size() > 0);
+        
+        boolean foundClass = false;
+        for (ObjectInstance objInst : mbeans) {
+            log.debug(objInst.getObjectName().getCanonicalName());
+            if (objInst.getClassName().equals(MBeanObjectServiceImpl.class.getName())) {
+                foundClass = true;
+            }
+        }
+        
+        assertTrue(foundClass);
+    }
+    
+    @Test
+    public void testFetchAllObjectInstanceDomains() {
+        Set<String> domains = this.service.fetchAllObjectInstanceDomains();
+        assertNotNull(domains);
+        assertTrue(domains.contains("net.zcarioca.jmx"));
+    }
+
+}
