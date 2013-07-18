@@ -18,9 +18,7 @@
  */
 package net.zcarioca.jmx.controller;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.ws.rs.GET;
