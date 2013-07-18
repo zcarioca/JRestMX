@@ -17,8 +17,13 @@
 	
 	<!-- 3rdparty Loggers -->
 	<logger name="org.springframework">
-		<level value="error" />
+		<level value="debug" />
 	</logger>
+    
+    <!-- 3rdparty Loggers -->
+    <logger name="org.glassfish">
+        <level value="debug" />
+    </logger>
 
 	<!-- Root Logger -->
 	<root>

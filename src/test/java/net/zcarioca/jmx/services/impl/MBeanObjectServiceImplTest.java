@@ -18,12 +18,14 @@
  */
 package net.zcarioca.jmx.services.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Set;
 
-import javax.management.ObjectInstance;
-
+import net.zcarioca.jmx.domain.MBeanDescriptor;
 import net.zcarioca.jmx.services.MBeanObjectService;
 
 import org.junit.Test;
@@ -49,16 +51,18 @@ public class MBeanObjectServiceImplTest {
     private MBeanObjectService service;
 
     @Test
-    public void testFetchAllObjectInstances() {
-        Set<ObjectInstance> mbeans = this.service.fetchAllObjectInstances();
+    public void testFetchAllMBeans() {
+        Set<MBeanDescriptor> mbeans = this.service.fetchAllMBeans();
         
         assertNotNull(mbeans);
         assertTrue(mbeans.size() > 0);
         
         boolean foundClass = false;
-        for (ObjectInstance objInst : mbeans) {
-            log.debug(objInst.getObjectName().getCanonicalName());
-            if (objInst.getClassName().equals(MBeanObjectServiceImpl.class.getName())) {
+        for (MBeanDescriptor objInst : mbeans) 
+        {
+            log.debug(objInst.toString());
+            if (objInst.getClassName().equals(MBeanObjectServiceImpl.class.getName()))
+            {
                 foundClass = true;
             }
         }
@@ -67,8 +71,38 @@ public class MBeanObjectServiceImplTest {
     }
     
     @Test
-    public void testFetchAllObjectInstanceDomains() {
-        Set<String> domains = this.service.fetchAllObjectInstanceDomains();
+    public void testFindMBeansByDomain()
+    {
+        Set<MBeanDescriptor> mbeans = this.service.findMBeansByDomain("net.zcarioca.jmx");
+        assertNotNull(mbeans);
+        assertEquals(1, mbeans.size());
+    }
+    
+    @Test
+    public void testFindMBeansByDomainNULL()
+    {
+        Set<MBeanDescriptor> mbeans = this.service.findMBeansByDomain("net.zcarioca.NOT_EXIST");
+        assertNull(mbeans);
+    }
+    
+    @Test
+    public void testFindMBeansByType()
+    {
+        Set<MBeanDescriptor> mbeans = this.service.findMBeansByType("net.zcarioca.jmx", "JRestMX");
+        assertNotNull(mbeans);
+        assertEquals(1, mbeans.size());
+    }
+    
+    @Test
+    public void testFindMBeansByTypeNULL()
+    {
+        Set<MBeanDescriptor> mbeans = this.service.findMBeansByType("net.zcarioca.jmx", "JRestMX_NOT_EXIST");
+        assertNull(mbeans);
+    }
+    
+    @Test
+    public void testFetchAllDomains() {
+        Set<String> domains = this.service.fetchAllDomains();
         assertNotNull(domains);
         assertTrue(domains.contains("net.zcarioca.jmx"));
     }

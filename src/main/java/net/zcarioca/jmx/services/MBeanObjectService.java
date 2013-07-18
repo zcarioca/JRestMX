@@ -21,7 +21,7 @@ package net.zcarioca.jmx.services;
 
 import java.util.Set;
 
-import javax.management.ObjectInstance;
+import net.zcarioca.jmx.domain.MBeanDescriptor;
 
 /**
  * A service used to fetch data about MBeans.
@@ -32,13 +32,28 @@ public interface MBeanObjectService {
     
     /**
      * Fetches all available MBean object instances.
-     * @return Returns a set of object instances.
+     * @return Returns a set of object instances. Returns NULL if none are found.
      */
-    public Set<ObjectInstance> fetchAllObjectInstances();
+    public Set<MBeanDescriptor> fetchAllMBeans();
+    
+    /**
+     * Finds all of the MBeans with a given domain.
+     * @param domain The domain.
+     * @return Returns all of the MBeans with a given domain. Returns NULL if none are found.
+     */
+    public Set<MBeanDescriptor> findMBeansByDomain(String domain);
+    
+    /**
+     * Gets all of the MBeans by type.
+     * @param domain The MBean 'Domain'.
+     * @param type The MBean 'Type'.
+     * @return Returns all of the mbeans with a given type. Returns NULL if none are found.
+     */
+    public Set<MBeanDescriptor> findMBeansByType(String domain, String type);
     
     /**
      * Fetches all of the object instance domains.
      * @return Returns all of the object instance domains.
      */
-    public Set<String> fetchAllObjectInstanceDomains();
+    public Set<String> fetchAllDomains();
 }

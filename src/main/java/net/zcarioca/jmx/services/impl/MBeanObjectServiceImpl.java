@@ -24,17 +24,24 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 
+import net.zcarioca.jmx.domain.MBeanDescriptor;
+import net.zcarioca.jmx.services.MBeanObjectService;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-
-import net.zcarioca.jmx.services.MBeanObjectService;
 
 /**
  * Implementation of the {@link MBeanObjectService}.
@@ -45,6 +52,7 @@ import net.zcarioca.jmx.services.MBeanObjectService;
 @ManagedResource(objectName="net.zcarioca.jmx:type=JRestMX,name=MBeanObjectService", description = "The MBean Object Service")
 class MBeanObjectServiceImpl implements MBeanObjectService 
 {
+    protected final Logger log = LoggerFactory.getLogger(getClass());
     private static final long startTime = System.currentTimeMillis();
     
     @Autowired(required = false)
@@ -60,9 +68,45 @@ class MBeanObjectServiceImpl implements MBeanObjectService
      * {@inheritDoc}
      */
     @Override
-    public Set<ObjectInstance> fetchAllObjectInstances() 
+    public Set<MBeanDescriptor> fetchAllMBeans() 
     {
-        return getPlatformMBeanServer().queryMBeans(null, null);
+        return toMBeanObjectSet(getPlatformMBeanServer().queryMBeans(null, null), null);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<MBeanDescriptor> findMBeansByDomain(final String domain) 
+    {
+        return toMBeanObjectSet(getPlatformMBeanServer().queryMBeans(null, null), new Predicate() {
+            @Override
+            public boolean evaluate(Object object) {
+                ObjectInstance objInst = (ObjectInstance)object;
+                return StringUtils.equalsIgnoreCase(domain, objInst.getObjectName().getDomain());
+            }
+        });
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<MBeanDescriptor> findMBeansByType(final String domain, final String type) 
+    {
+        return toMBeanObjectSet(getPlatformMBeanServer().queryMBeans(null, null), new Predicate() {
+            @Override
+            public boolean evaluate(Object object) {
+                ObjectInstance objInst = (ObjectInstance)object;
+                ObjectName name = objInst.getObjectName();
+                if (StringUtils.equalsIgnoreCase(domain, objInst.getObjectName().getDomain()))
+                {
+                    String objectType = name.getKeyProperty("type");
+                    return StringUtils.equalsIgnoreCase(type, objectType);
+                }
+                return false;
+            }
+        });
     }
     
     /**
@@ -70,10 +114,15 @@ class MBeanObjectServiceImpl implements MBeanObjectService
      */
     @Override
     @ManagedAttribute(description = "The list of object instance domains.")
-    public Set<String> fetchAllObjectInstanceDomains() 
+    public Set<String> fetchAllDomains() 
     {
         return new HashSet<String>(Arrays.asList(getPlatformMBeanServer().getDomains()));
     }
+    
+    
+    // --------------------------------------------------------------
+    // INTERNALS
+    // --------------------------------------------------------------
     
     private MBeanServer getPlatformMBeanServer() 
     {
@@ -106,5 +155,40 @@ class MBeanObjectServiceImpl implements MBeanObjectService
             return mbeanServer;
         }
     }
+    
+    private Set<MBeanDescriptor> toMBeanObjectSet(Set<ObjectInstance> set, Predicate predicate) 
+    {
+        if (set == null)
+        {
+            return null;
+        }
+        if (predicate != null)
+        {
+            CollectionUtils.filter(set, predicate);
+        }
+        if (CollectionUtils.isNotEmpty(set))
+        {
+            Set<MBeanDescriptor> mbeans = new HashSet<MBeanDescriptor>(set.size());
+            for (ObjectInstance objectInstance : set) 
+            {
+                mbeans.add(toMBeanObject(objectInstance));
+            }
+            return mbeans;
+        }
+        return null;
+    }
 
+    private MBeanDescriptor toMBeanObject(ObjectInstance objectInstance) 
+    {
+        try
+        {
+            MBeanInfo info = mbeanServer.getMBeanInfo(objectInstance.getObjectName());
+            return new MBeanDescriptor(objectInstance.getObjectName(), info);
+        }
+        catch (Exception exc)
+        {
+            log.warn("Could not find information for MBean: " + objectInstance.getObjectName(), exc);
+        }
+        return null;
+    }
 }
