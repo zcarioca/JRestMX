@@ -19,12 +19,14 @@
 
         <!-- dependencies -->
         <jersey.version>2.0</jersey.version>
-
+        <jcommander.version>1.30</jcommander.version>
+        <jetty.version>8.1.11.v20130520</jetty.version>
         <spring.version>[2.5,]</spring.version>
         <slf4j.version>1.7.5</slf4j.version>
         <commons-lang.version>3.1</commons-lang.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <junit.version>4.11</junit.version>
+        <servlet.api.version>2.4</servlet.api.version>
 
         <!-- plugin versions -->
         <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
@@ -88,6 +90,29 @@
             <version>${spring.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        
+        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
         </dependency>
@@ -104,6 +129,12 @@
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>${jcommander.version}</version>
         </dependency>
 
         <!-- test only dependencies -->
@@ -124,6 +155,13 @@
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
             <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>${servlet.api.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
