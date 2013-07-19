@@ -37,6 +37,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class JRestMXStandaloneServer
 {
+    private static final String BASE_URL = "http://localhost:8080/";
     private static final String APP_CONTEXT = "/META-INF/spring/jrestmx-context.xml";
     
     private ApplicationContext ctx;
@@ -51,23 +52,27 @@ public class JRestMXStandaloneServer
         this.ctx = ctx;
     }
     
+    public void stop()
+    {
+        server.stop();
+    }
+    
     public void start()
     {
         ResourceConfig config = new ResourceConfig();
-//        config.packages("net.zcarioca.jmx.controller");
         config.register(new JacksonFeature());
         config.registerInstances(ctx.getBean(MBeanController.class));
         
-        server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://localhost:8080/"), config);
+        server = GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URL), config);
     }
     
     public static void main(String[] args) throws Exception 
     {
-        
         JRestMXStandaloneServer server = new JRestMXStandaloneServer();
         
         server.start();
+        System.out.println("Running at url: " + BASE_URL);
         System.in.read();
-        
+        server.stop();
     }
 }
